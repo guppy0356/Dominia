@@ -1,11 +1,8 @@
 import { Hono } from 'hono'
 import { renderer } from './renderer'
+import type { Env } from './env'
 
-type Bindings = {
-  FULLNAME: string
-}
-
-const app = new Hono<{ Bindings: Bindings }>()
+const app = new Hono<{ Bindings: Env }>()
 
 app.use(renderer)
 
