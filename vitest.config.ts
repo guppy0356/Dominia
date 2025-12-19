@@ -6,6 +6,9 @@ export default defineWorkersConfig({
     poolOptions: {
       workers: {
         wrangler: { configPath: './wrangler.jsonc' },
+        miniflare: {
+          compatibilityFlags: ['nodejs_compat'],
+        },
       },
     },
   },
