@@ -1,5 +1,5 @@
-import type { Env } from '../src/env'
+import type { Bindings } from '../src/types'
 
 declare module 'cloudflare:test' {
-  interface ProvidedEnv extends Env {}
+  interface ProvidedEnv extends Bindings {}
 }

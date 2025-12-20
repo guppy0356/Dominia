@@ -1,12 +1,12 @@
 import { Hono } from 'hono'
 import { renderer } from './renderer'
-import type { Env } from './env'
+import type { Bindings } from './types'
 import { neon } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
 import { count } from 'drizzle-orm'
 import { entries } from './db/schema'
 
-const app = new Hono<{ Bindings: Env }>()
+const app = new Hono<{ Bindings: Bindings }>()
 
 app.use(renderer)
 

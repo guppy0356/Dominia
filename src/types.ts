@@ -5,4 +5,4 @@ const envSchema = z.object({
   DATABASE_URL: z.string(),
 });
 
-export type Env = z.infer<typeof envSchema>;
+export type Bindings = z.infer<typeof envSchema>;
