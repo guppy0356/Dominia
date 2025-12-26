@@ -28,7 +28,7 @@ describe('GET /entries', () => {
     beforeEach(() => {
       fetchMock.activate()
       fetchMock.disableNetConnect()
-      fetchMock.enableNetConnect(/localhost:8765/)
+      fetchMock.enableNetConnect(/db\.localtest\.me:4444/)
 
       fetchMock
         .get(TEST_JWKS_HOST)
