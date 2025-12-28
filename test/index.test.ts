@@ -1,58 +1,58 @@
-import { describe, it, expect, beforeAll, beforeEach, afterEach } from 'vitest'
-import { env, fetchMock } from 'cloudflare:test'
-import app from '../src/index'
-import { createAuthTools, type AuthTools } from './helpers/jwt'
+import { env, fetchMock } from "cloudflare:test";
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import app from "../src/index";
+import { type AuthTools, createAuthTools } from "./helpers/jwt";
 
-const TEST_JWKS_HOST = 'https://test-jwks.local'
+const TEST_JWKS_HOST = "https://test-jwks.local";
 
 const createTestEnv = () => ({
   ...env,
   JWKS_URI: `${TEST_JWKS_HOST}/.well-known/jwks.json`,
-})
+});
 
-describe('GET /entries', () => {
-  describe('without authentication', () => {
-    it('should return 401 without authorization header', async () => {
-      const res = await app.request('/entries', {}, createTestEnv())
-      expect(res.status).toBe(401)
-    })
-  })
+describe("GET /entries", () => {
+  describe("without authentication", () => {
+    it("should return 401 without authorization header", async () => {
+      const res = await app.request("/entries", {}, createTestEnv());
+      expect(res.status).toBe(401);
+    });
+  });
 
-  describe('with valid authentication', () => {
-    let auth: AuthTools
+  describe("with valid authentication", () => {
+    let auth: AuthTools;
 
     beforeAll(async () => {
-      auth = await createAuthTools()
-    })
+      auth = await createAuthTools();
+    });
 
     beforeEach(() => {
-      fetchMock.activate()
-      fetchMock.disableNetConnect()
-      fetchMock.enableNetConnect(/db\.localtest\.me:4444/)
+      fetchMock.activate();
+      fetchMock.disableNetConnect();
+      fetchMock.enableNetConnect(/db\.localtest\.me:4444/);
 
       fetchMock
         .get(TEST_JWKS_HOST)
-        .intercept({ path: '/.well-known/jwks.json' })
-        .reply(200, { keys: [auth.publicJwk] })
-    })
+        .intercept({ path: "/.well-known/jwks.json" })
+        .reply(200, { keys: [auth.publicJwk] });
+    });
 
     afterEach(() => {
-      fetchMock.assertNoPendingInterceptors()
-      fetchMock.deactivate()
-    })
+      fetchMock.assertNoPendingInterceptors();
+      fetchMock.deactivate();
+    });
 
-    it('should return 200 with valid JWT', async () => {
-      const token = await auth.createToken()
+    it("should return 200 with valid JWT", async () => {
+      const token = await auth.createToken();
       const res = await app.request(
-        '/entries',
+        "/entries",
         { headers: { Authorization: `Bearer ${token}` } },
-        createTestEnv()
-      )
+        createTestEnv(),
+      );
 
-      expect(res.status).toBe(200)
-      const html = await res.text()
-      expect(html).toContain('Entries:')
-      expect(html).toMatch(/Entries:\s*\d+/)
-    })
-  })
-})
+      expect(res.status).toBe(200);
+      const html = await res.text();
+      expect(html).toContain("Entries:");
+      expect(html).toMatch(/Entries:\s*\d+/);
+    });
+  });
+});
