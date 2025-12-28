@@ -1,11 +1,14 @@
-import { neon, neonConfig } from '@neondatabase/serverless'
-import { drizzle } from 'drizzle-orm/neon-http'
+import { neonConfig, Pool } from '@neondatabase/serverless'
+import { drizzle } from 'drizzle-orm/neon-serverless'
+import ws from 'ws';
 
-export function database(url: string) {
-  neonConfig.fetchEndpoint = (host) => {
-    const [protocol, port] = host === 'db.localtest.me' ? ['http', 4444] : ['https', 443];
-    return `${protocol}://${host}:${port}/sql`;
-  }
+export function database(connectionString: string) {
+  const pool = new Pool({ connectionString })
+  const connectionStringUrl = new URL(connectionString)
 
-  return drizzle({ client: neon(url) })
+  neonConfig.useSecureWebSocket = connectionStringUrl.hostname !== 'db.localtest.me'
+  neonConfig.wsProxy = (host) => (host === 'db.localtest.me' ? `${host}:4444/v2` : `${host}/v2`)
+  neonConfig.webSocketConstructor = ws;
+
+  return drizzle({ client: pool })
 }
