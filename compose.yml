@@ -3,9 +3,9 @@ services:
     image: postgres:17
     command: "-d 1"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: main
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
     ports:
       - "5432:5432"
     volumes:
@@ -19,7 +19,7 @@ services:
   neon-proxy:
     image: ghcr.io/timowilhelm/local-neon-http-proxy:main
     environment:
-      - PG_CONNECTION_STRING=postgres://postgres:postgres@postgres:5432/main
+      PG_CONNECTION_STRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     ports:
       - "4444:4444"
     depends_on:
