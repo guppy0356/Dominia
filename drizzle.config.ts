@@ -1,7 +1,9 @@
-import { config } from "dotenv";
+import dotenv from "dotenv";
+import dotenvExpand from "dotenv-expand";
 import { defineConfig } from "drizzle-kit";
 
-config({ path: "./.dev.vars" });
+const env = dotenv.config();
+dotenvExpand.expand(env);
 
 export default defineConfig({
   schema: "./src/db/schema.ts",
