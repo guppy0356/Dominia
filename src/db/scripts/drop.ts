@@ -24,9 +24,19 @@ async function dropDatabase() {
   const adminSql = postgres(`${POSTGRES_URL}/postgres`);
 
   try {
-    await adminSql.unsafe(`DROP DATABASE IF EXISTS ${POSTGRES_DB}`);
+    // Check if database exists
+    const result = await adminSql.unsafe(
+      `SELECT 1 FROM pg_database WHERE datname = '${POSTGRES_DB}'`,
+    );
 
-    console.log(`✓ Dropped database: ${POSTGRES_DB}`);
+    if (result.length > 0) {
+      // Database exists, drop it
+      await adminSql.unsafe(`DROP DATABASE ${POSTGRES_DB}`);
+      console.log(`✓ Dropped database: ${POSTGRES_DB}`);
+    } else {
+      // Database doesn't exist
+      console.log(`✓ Database doesn't exist: ${POSTGRES_DB} (nothing to drop)`);
+    }
   } catch (error) {
     console.error(`\n✗ Failed to drop database: ${(error as Error).message}`);
     await adminSql.end();
