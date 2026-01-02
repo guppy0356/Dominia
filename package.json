@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:prepare": "tsx test/prepare.ts",
     "db:drop": "tsx src/db/scripts/drop.ts",
-    "db:create": "tsx src/db/scripts/create.ts"
+    "db:create": "tsx src/db/scripts/create.ts",
+    "db:migrate": "(npm run db:create || true) && npx drizzle-kit migrate"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
