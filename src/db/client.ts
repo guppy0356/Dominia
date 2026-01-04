@@ -7,10 +7,12 @@ export function database(connectionString: string) {
   const pool = new Pool({ connectionString });
   const connectionStringUrl = new URL(connectionString);
 
+  const isLocal = (hostname: string) => hostname.endsWith(".localtest.me");
+
   neonConfig.useSecureWebSocket =
-    connectionStringUrl.hostname !== "db.localtest.me";
+    isLocal(connectionStringUrl.hostname) === false;
   neonConfig.wsProxy = (host) =>
-    host === "db.localtest.me" ? `${host}:4444/v2` : `${host}/v2`;
+    isLocal(host) ? `${host}:4444/v2` : `${host}/v2`;
   neonConfig.webSocketConstructor = ws;
 
   return drizzle(pool, { schema: schema });

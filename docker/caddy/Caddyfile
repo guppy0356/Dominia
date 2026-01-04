@@ -1,0 +1,11 @@
+{
+    auto_https off
+}
+
+http://dev.localtest.me:4444 {
+    reverse_proxy neon-proxy-dev:4444
+}
+
+http://test.localtest.me:4444 {
+    reverse_proxy neon-proxy-test:4444
+}

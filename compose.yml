@@ -17,12 +17,22 @@ services:
       timeout: 5s
       retries: 5
 
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "4444:4444"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+    depends_on:
+      - neon-proxy-dev
+      - neon-proxy-test
+
   neon-proxy-dev:
     image: ghcr.io/timowilhelm/local-neon-http-proxy:main
     environment:
       PG_CONNECTION_STRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-    ports:
-      - "4444:4444"
+    expose:
+      - "4444"
     depends_on:
       postgres:
         condition: service_healthy
@@ -31,8 +41,8 @@ services:
     image: ghcr.io/timowilhelm/local-neon-http-proxy:main
     environment:
       PG_CONNECTION_STRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/test
-    ports:
-      - "4445:4444"
+    expose:
+      - "4444"
     depends_on:
       postgres:
         condition: service_healthy
