@@ -40,7 +40,7 @@ services:
   neon-proxy-test:
     image: ghcr.io/timowilhelm/local-neon-http-proxy:main
     environment:
-      PG_CONNECTION_STRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/test
+      PG_CONNECTION_STRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_TEST_DB}
     expose:
       - "4444"
     depends_on:
