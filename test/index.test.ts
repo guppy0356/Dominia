@@ -1,6 +1,6 @@
 import { env, fetchMock } from "cloudflare:test";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import app from "../src/index";
+import app from "@/index";
 import { type AuthTools, createAuthTools } from "./helpers/jwt";
 
 const TEST_JWKS_HOST = "https://test-jwks.local";

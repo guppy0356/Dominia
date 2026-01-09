@@ -11,6 +11,9 @@
       "@cloudflare/vitest-pool-workers",
       "./worker-configuration.d.ts"
     ],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   }

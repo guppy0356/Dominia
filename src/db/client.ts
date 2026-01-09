@@ -1,7 +1,7 @@
 import { neonConfig, Pool } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import ws from "ws";
-import * as schema from "./schema";
+import * as schema from "@/db/schema";
 
 export function database(connectionString: string) {
   const pool = new Pool({ connectionString });

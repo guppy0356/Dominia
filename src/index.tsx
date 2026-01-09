@@ -1,10 +1,10 @@
 import { count } from "drizzle-orm";
 import { Hono } from "hono";
 import { jwk } from "hono/jwk";
-import { database } from "./db/client";
-import { entries } from "./db/schema";
-import { renderer } from "./renderer";
-import type { Bindings } from "./types";
+import { database } from "@/db/client";
+import { entries } from "@/db/schema";
+import { renderer } from "@/renderer";
+import type { Bindings } from "@/types";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
