@@ -57,5 +57,5 @@ const app = new Hono<{ Bindings: CloudflareBindings }>()
 
 ## Roadmap
 
-- Test database management
-- Parallel test execution
+- Change responses to JSON format
+- Set up test environment with seed data
