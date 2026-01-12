@@ -1,4 +1,3 @@
-import { count } from "drizzle-orm";
 import { Hono } from "hono";
 import { database } from "@/db/client";
 import { entries } from "@/db/schema";
@@ -12,15 +11,25 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.use(createJwtMiddleware());
 
 /**
- * GET / - List entries count (currently returns HTML)
+ * GET / - List all entries
  * Protected by JWT authentication
+ * Returns JSON array of entries with id, url, and createdAt (ISO 8601)
  */
 app.get("/", async (c) => {
   const db = database(c.env.DATABASE_URL);
-  const result = await db.select({ count: count() }).from(entries);
-  const totalCount = result[0].count;
 
-  return c.render(<h1>Entries: {totalCount}</h1>);
+  // Query all entries
+  const results = await db.select().from(entries);
+
+  // Transform to API response format
+  // Convert Date objects to ISO 8601 strings
+  const response = results.map((entry) => ({
+    id: entry.id,
+    url: entry.url,
+    createdAt: entry.createdAt.toISOString(),
+  }));
+
+  return c.json(response);
 });
 
 /**

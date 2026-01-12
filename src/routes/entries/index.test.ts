@@ -35,18 +35,17 @@ describe("GET /entries", () => {
       fetchMock.deactivate();
     });
 
-    it("should return 200 with valid JWT", async () => {
+    it("should return 200 with JSON array", async () => {
       const token = await jwtHelper.createToken();
       const res = await app.request(
         "/entries",
         { headers: { Authorization: `Bearer ${token}` } },
         env,
       );
+      const data = await res.json();
 
       expect(res.status).toBe(200);
-      const html = await res.text();
-      expect(html).toContain("Entries:");
-      expect(html).toMatch(/Entries:\s*\d+/);
+      expect(Array.isArray(data)).toBe(true);
     });
   });
 });

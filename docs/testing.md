@@ -59,7 +59,7 @@ Tests are colocated with source code for better maintainability:
 Example structure:
 ```
 src/routes/entries/
-├── index.tsx         # Route handlers
+├── index.ts          # Route handlers
 └── index.test.ts     # Integration tests
 test/
 ├── helpers/jwt.ts    # Shared JWT utilities
