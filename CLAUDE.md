@@ -2,25 +2,23 @@
 
 ## Project Overview
 **Dominia**: A learning project for building CRUD applications.
-- **Stack**: Hono (SSR), Drizzle ORM, Neon (Postgres), Vitest (Cloudflare Workers).
+- **Stack**: Hono (JSON API), Drizzle ORM, Neon (Postgres), Vitest (Cloudflare Workers).
 - **Env**: Local (Docker/Caddy) and Production (Cloudflare/Neon).
 
 ## File Structure
 src/
 ├── routes/
 │   └── entries/
-│       ├── index.tsx         # Entries routes sub-app (GET, POST, etc.)
+│       ├── index.ts          # Entries routes sub-app (GET, POST, etc.)
 │       └── index.test.ts     # Colocated integration tests
 ├── middleware/
-│   ├── renderer.tsx      # JSX Renderer middleware
 │   └── auth.ts           # JWT authentication config
 ├── db/
 │   ├── client.ts         # DB connection (Local/Remote auto-switch)
 │   ├── schema.ts         # Drizzle schema definition
 │   └── migrations/       # SQL migration files
-├── index.tsx             # Hono app entry (mounts routes)
-├── types.ts              # Zod schemas & Env types
-└── style.css
+├── index.ts              # Hono app entry (mounts routes)
+└── types.ts              # Zod schemas & Env types
 test/
 ├── helpers/
 │   └── jwt.ts            # JWT/Auth mocking helpers
@@ -47,12 +45,12 @@ Refer to `docs/` for complex logic details:
 
 ## Routing Organization
 Routes are organized using Hono's `app.route()` pattern for scalability:
-- **Sub-apps**: Each resource (entries, users, etc.) has its own sub-app in `src/routes/{resource}/index.tsx`
+- **Sub-apps**: Each resource (entries, users, etc.) has its own sub-app in `src/routes/{resource}/index.ts`
 - **Type Safety**: All sub-apps use `new Hono<{ Bindings: Bindings }>()` for proper type inference
-- **Middleware**: Apply at different levels (global in `index.tsx`, resource-level in sub-apps)
+- **Middleware**: Apply at different levels (global in `index.ts`, resource-level in sub-apps)
 - **Adding Routes**:
-  1. Create `src/routes/{resource}/index.tsx` with a Hono sub-app
-  2. Mount in `src/index.tsx`: `app.route("/{resource}", resourceApp)`
+  1. Create `src/routes/{resource}/index.ts` with a Hono sub-app
+  2. Mount in `src/index.ts`: `app.route("/{resource}", resourceApp)`
 
 ## Development Rules
 1. **Lefthook & Git Hooks**:

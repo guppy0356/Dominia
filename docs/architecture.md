@@ -42,7 +42,7 @@ Environment variables are defined and validated using **Zod** in `src/types.ts`.
 
 ## Hono App Structure
 
-* **Entry Point**: `src/index.tsx` exports the Hono app instance and mounts route sub-apps.
+* **Entry Point**: `src/index.ts` exports the Hono app instance and mounts route sub-apps.
 * **API Design**: All endpoints return JSON responses.
 * **Middleware**: Protected routes utilize `jwk()` middleware for JWT validation, configured in `src/middleware/auth.ts`.
 * **Dependency Injection**: The Database client is instantiated **per-request** via `database(c.env.DATABASE_URL)` to ensure the correct environment variables are used.
@@ -61,7 +61,7 @@ src/
 │       └── index.test.ts   # Colocated integration tests
 ├── middleware/
 │   └── auth.ts             # JWT auth configuration
-└── index.tsx               # Main app (mounts routes)
+└── index.ts                # Main app (mounts routes)
 ```
 
 ### Sub-Apps Pattern
@@ -113,7 +113,7 @@ To add a new resource:
 1. Create `src/routes/{resource}/index.ts`
 2. Define a Hono sub-app with `new Hono<{ Bindings: Bindings }>()`
 3. Add route handlers and middleware
-4. Mount in `src/index.tsx`: `app.route("/{resource}", resourceApp)`
+4. Mount in `src/index.ts`: `app.route("/{resource}", resourceApp)`
 
 **Benefits**:
 * Clear separation of concerns
