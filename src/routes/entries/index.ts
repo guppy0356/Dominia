@@ -3,7 +3,8 @@ import { HTTPException } from "hono/http-exception";
 import { database } from "@/db/client";
 import { entries } from "@/db/schema";
 import { createJwtMiddleware } from "@/middleware/auth";
-import type { Bindings, EntriesListResponse } from "@/types";
+import * as EntrySchema from "@/routes/entries/schema";
+import type { Bindings } from "@/types";
 
 // Create sub-app with same Bindings type for proper type inference
 const app = new Hono<{ Bindings: Bindings }>();
@@ -24,19 +25,12 @@ app.get("/", async (c) => {
 
   try {
     // Query all entries
-    const results = await db.select().from(entries);
+    const entryCollection = await db.select().from(entries);
+    const safeResponse = EntrySchema.collection.parse(entryCollection);
 
-    // Transform to API response format
-    // Convert Date objects to ISO 8601 strings
-    const response: EntriesListResponse = results.map((entry) => ({
-      id: entry.id,
-      url: entry.url,
-      createdAt: entry.createdAt.toISOString(),
-    }));
-
-    return c.json(response, 200);
+    return c.json(safeResponse, 200);
   } catch {
-    // Database errors should return 500 with JSON error response
+    // Database or validation errors should return 500 with JSON error response
     throw new HTTPException(500, {
       res: new Response(
         JSON.stringify({ message: "Failed to fetch entries from database" }),

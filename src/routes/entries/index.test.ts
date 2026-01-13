@@ -2,7 +2,7 @@ import { env, fetchMock } from "cloudflare:test";
 import { createJwtTestHelper, type JwtHelper } from "@test/helpers/jwt";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import app from "@/index";
-import type { EntriesListResponse, ErrorResponse } from "@/types";
+import type { Collection, ErrorResponse } from "@/routes/entries/schema";
 
 describe("GET /entries", () => {
   describe("without authentication", () => {
@@ -49,7 +49,7 @@ describe("GET /entries", () => {
       expect(res.headers.get("content-type")).toContain("application/json");
 
       // Verify response structure
-      const data = (await res.json()) as EntriesListResponse;
+      const data = (await res.json()) as Collection;
       expect(Array.isArray(data)).toBe(true);
 
       // Verify entry structure if data exists
