@@ -58,6 +58,7 @@ src/
 ├── routes/
 │   └── {resource}/
 │       ├── index.ts        # Sub-app for each resource
+│       ├── schema.ts       # Zod validation schemas (drizzle-zod)
 │       └── index.test.ts   # Colocated integration tests
 ├── middleware/
 │   └── auth.ts             # JWT auth configuration
@@ -129,3 +130,30 @@ To add a new resource:
     1.  Modify `src/db/schema.ts`.
     2.  Generate migration: `npx drizzle-kit generate`.
     3.  Apply migration: `npm run db:migrate`.
+
+### Validation Layer with drizzle-zod
+
+The project uses a two-layer schema approach:
+
+1. **Database Schema** (`src/db/schema.ts`): Drizzle ORM table definitions
+2. **Validation Schema** (`src/routes/{resource}/schema.ts`): Zod schemas for runtime validation
+
+**drizzle-zod Integration**:
+* Generates base Zod schemas automatically from Drizzle table definitions
+* Extended with additional validation rules (e.g., URL format validation)
+* Provides type inference for TypeScript types
+
+**Example** (`src/routes/entries/schema.ts`):
+```typescript
+const selectSchema = createSelectSchema(entries); // From Drizzle table
+export const entry = selectSchema.extend({
+  url: z.url(), // Additional validation
+});
+export const collection = z.array(entry);
+```
+
+**Benefits**:
+* Single source of truth (Drizzle schema)
+* Automatic type safety from database to API
+* Runtime validation prevents invalid data from reaching clients
+* Colocated with routes for better organization

@@ -8,7 +8,6 @@ import type { Bindings } from "@/types";
  */
 export function createJwtMiddleware() {
   return jwk({
-    jwks_uri: (c: Context<{ Bindings: Bindings }>) =>
-      c.env.JWKS_URI ?? "https://keeplater.kinde.com/.well-known/jwks.json",
+    jwks_uri: (c: Context<{ Bindings: Bindings }>) => c.env.JWKS_URI,
   });
 }
