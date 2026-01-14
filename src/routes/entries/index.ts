@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
 import { database } from "@/db/client";
 import { entries } from "@/db/schema";
 import { createJwtMiddleware } from "@/middleware/auth";
@@ -23,23 +22,11 @@ app.use(createJwtMiddleware());
 app.get("/", async (c) => {
   const db = database(c.env.DATABASE_URL);
 
-  try {
-    // Query all entries
-    const entryCollection = await db.select().from(entries);
-    const safeResponse = EntrySchema.collection.parse(entryCollection);
+  // Query all entries
+  const entryCollection = await db.select().from(entries);
+  const safeResponse = EntrySchema.collection.parse(entryCollection);
 
-    return c.json(safeResponse, 200);
-  } catch {
-    // Database or validation errors should return 500 with JSON error response
-    throw new HTTPException(500, {
-      res: new Response(
-        JSON.stringify({ message: "Failed to fetch entries from database" }),
-        {
-          headers: { "Content-Type": "application/json" },
-        },
-      ),
-    });
-  }
+  return c.json(safeResponse, 200);
 });
 
 /**
