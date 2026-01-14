@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { database } from "@/db/client";
+import { createDrizzleClient } from "@/db/client";
 import { entries } from "@/db/schema";
 import { createJwtMiddleware } from "@/middleware/auth";
 import * as EntrySchema from "@/routes/entries/schema";
@@ -20,10 +20,10 @@ app.use(createJwtMiddleware());
  * @throws 500 - Database connection or query failure
  */
 app.get("/", async (c) => {
-  const db = database(c.env.DATABASE_URL);
+  const client = createDrizzleClient(c.env.DATABASE_URL);
 
   // Query all entries
-  const entryCollection = await db.select().from(entries);
+  const entryCollection = await client.select().from(entries);
   const safeResponse = EntrySchema.collection.parse(entryCollection);
 
   return c.json(safeResponse, 200);

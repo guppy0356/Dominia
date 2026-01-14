@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
 import { getTableName, is, sql } from "drizzle-orm";
 import { PgTable } from "drizzle-orm/pg-core";
-import { database } from "../src/db/client";
+import { createDrizzleClient } from "../src/db/client";
 import * as schema from "../src/db/schema";
 
 function loadEnv(isTest: boolean): string {
@@ -20,7 +20,7 @@ function loadEnv(isTest: boolean): string {
 }
 
 async function cleanDatabase(databaseUrl: string) {
-  const db = database(databaseUrl);
+  const client = createDrizzleClient(databaseUrl);
 
   // Extract table names from schema
   const tables = Object.values(schema).filter((value) => is(value, PgTable));
@@ -30,14 +30,18 @@ async function cleanDatabase(databaseUrl: string) {
 
   // Drop tables with CASCADE
   for (const tableName of tableNames) {
-    await db.execute(sql.raw(`DROP TABLE IF EXISTS "${tableName}" CASCADE`));
+    await client.execute(
+      sql.raw(`DROP TABLE IF EXISTS "${tableName}" CASCADE`),
+    );
     console.log(`   ✓ Dropped table: ${tableName}`);
   }
 
   // Truncate migrations table in drizzle schema
   console.log("🔄 Truncating drizzle.__drizzle_migrations...");
   try {
-    await db.execute(sql.raw("TRUNCATE TABLE drizzle.__drizzle_migrations"));
+    await client.execute(
+      sql.raw("TRUNCATE TABLE drizzle.__drizzle_migrations"),
+    );
     console.log("   ✓ Truncated drizzle.__drizzle_migrations");
   } catch {
     console.log(

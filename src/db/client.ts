@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/neon-serverless";
 import ws from "ws";
 import * as schema from "@/db/schema";
 
-export function database(connectionString: string) {
+export function createDrizzleClient(connectionString: string) {
   const pool = new Pool({ connectionString });
   const connectionStringUrl = new URL(connectionString);
 

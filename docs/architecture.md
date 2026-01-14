@@ -5,7 +5,7 @@
 The project handles database connections differently for local development and production to support the Neon serverless environment.
 
 ### Connection Logic
-The `database()` function in `src/db/client.ts` manages the connection:
+The `createDrizzleClient()` function in `src/db/client.ts` manages the connection:
 
 * **Production**: Connects directly to Neon serverless Postgres.
 * **Local Development**: Uses `.localtest.me` domains with a custom WebSocket proxy on port `4444`.
@@ -45,7 +45,7 @@ Environment variables are defined and validated using **Zod** in `src/types.ts`.
 * **Entry Point**: `src/index.ts` exports the Hono app instance and mounts route sub-apps.
 * **API Design**: All endpoints return JSON responses.
 * **Middleware**: Protected routes utilize `jwk()` middleware for JWT validation, configured in `src/middleware/auth.ts`.
-* **Dependency Injection**: The Database client is instantiated **per-request** via `database(c.env.DATABASE_URL)` to ensure the correct environment variables are used.
+* **Dependency Injection**: The Database client is instantiated **per-request** via `createDrizzleClient(c.env.DATABASE_URL)` to ensure the correct environment variables are used.
 
 ## Routing Organization
 
