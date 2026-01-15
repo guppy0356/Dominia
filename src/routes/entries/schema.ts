@@ -17,10 +17,3 @@ export const collection = z.array(entry);
 // Export inferred types for use throughout the application
 export type Entry = z.infer<typeof entry>;
 export type Collection = z.infer<typeof collection>;
-
-// Error response schema for API errors
-export const errorResponse = z.object({
-  message: z.string(),
-});
-
-export type ErrorResponse = z.infer<typeof errorResponse>;

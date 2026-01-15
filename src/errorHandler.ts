@@ -7,10 +7,17 @@ export function createErrorHandler() {
       return error.getResponse();
     }
 
-    // Return 500 for all other unhandled errors
-    return new Response(JSON.stringify({ message: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    // Return 500 for all other unhandled errors (RFC 9457 format)
+    return new Response(
+      JSON.stringify({
+        type: "about:blank",
+        title: "Internal Server Error",
+        status: 500,
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/problem+json" },
+      },
+    );
   };
 }
