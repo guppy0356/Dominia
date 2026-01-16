@@ -9,9 +9,9 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "type-check": "npm run cf-typegen && tsc --noEmit",
     "hono:env": "tsx scripts/generate-dev-vars.ts",
-    "db:migrate": "npx drizzle-kit migrate",
+    "db:migrate": "npx dotenv -e .env -- drizzle-kit migrate",
     "db:clean": "tsx scripts/db-clean.ts",
-    "test:prepare": "npx drizzle-kit migrate --config=drizzle.test.config.ts",
+    "test:prepare": "npx dotenv -e .env.test -- drizzle-kit migrate",
     "test:clean": "tsx scripts/db-clean.ts --env=test",
     "test": "vitest run"
   },

@@ -1,10 +1,7 @@
-import dotenv from "dotenv";
-import dotenvExpand from "dotenv-expand";
 import { defineConfig } from "drizzle-kit";
+import { parseEnv } from "@/types";
 
-const env: Record<string, string> = {};
-const parsed = dotenv.config({ processEnv: env });
-dotenvExpand.expand({ ...parsed, processEnv: env });
+const env = parseEnv(process.env);
 
 export default defineConfig({
   schema: "./src/db/schema.ts",
