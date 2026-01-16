@@ -4,10 +4,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "$npm_execpath run build && vite preview",
-    "deploy": "$npm_execpath run build && wrangler deploy",
+    "preview": "npm run build && vite preview",
+    "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
-    "type-check": "$npm_execpath run cf-typegen && tsc --noEmit",
+    "type-check": "npm run cf-typegen && tsc --noEmit",
     "hono:env": "tsx scripts/generate-dev-vars.ts",
     "db:migrate": "npx drizzle-kit migrate",
     "db:clean": "tsx scripts/db-clean.ts",
