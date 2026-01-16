@@ -1,0 +1,46 @@
+name: Test
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: neondatabase/create-branch-action@v6
+        id: create-branch
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch_name: ci/pr-${{ github.event.pull_request.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Prepare Test DB
+        run: npm run test:prepare
+        env:
+          DATABASE_URL: ${{ steps.create-branch.outputs.db_url_with_pooler }}
+
+      - name: Run Tests
+        run: npm test
+        env:
+          DATABASE_URL: ${{ steps.create-branch.outputs.db_url_with_pooler }}
+          JWKS_URI: https://test-jwks.local/.well-known/jwks.json
