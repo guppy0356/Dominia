@@ -19,14 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v6
-
-      - uses: mongolyy/reviewdog-action-biome@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          persist-credentials: false
+
+      - uses: biomejs/setup-biome@v2
+
+      - name: Run Biome
+        run: biome ci .
 
   type-check:
     name: Type Check
