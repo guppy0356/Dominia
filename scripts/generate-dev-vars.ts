@@ -2,7 +2,7 @@ import fs from "node:fs";
 import dotenv from "dotenv";
 import { expand } from "dotenv-expand";
 import { z } from "zod";
-import { parseEnv } from "../src/types";
+import { envSchema } from "../src/types";
 
 function generateDevVars(envPath: string, outputPath: string) {
   // Create a clean environment for this file
@@ -13,7 +13,7 @@ function generateDevVars(envPath: string, outputPath: string) {
   try {
     console.log(`🔄 Syncing ${envPath} to ${outputPath}...`);
 
-    const parsedEnv = parseEnv(processEnv);
+    const parsedEnv = envSchema.parse(processEnv);
 
     const devVarsContent = Object.entries(parsedEnv)
       .map(([key, value]) => `${key}=${value}`)

@@ -1,7 +1,7 @@
 import { defineConfig } from "drizzle-kit";
-import { parseEnv } from "@/types";
+import { envSchema } from "@/types";
 
-const env = parseEnv(process.env);
+const env = envSchema.pick({ DATABASE_URL: true }).parse(process.env);
 
 export default defineConfig({
   schema: "./src/db/schema.ts",
