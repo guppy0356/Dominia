@@ -13,9 +13,10 @@ export function createDrizzleClient(connectionString: string) {
     neonConfig.pipelineTLS = false;
     neonConfig.pipelineConnect = false;
   } else {
-    neonConfig.wsProxy = (host) => `${host}/v2`;
-    neonConfig.useSecureWebSocket = true;
+    // CI/Production: HTTP-only mode via Neon pooler
+    // Don't set wsProxy to avoid WebSocket connection attempts
     neonConfig.poolQueryViaFetch = true;
+    neonConfig.fetchConnectionCache = true;
   }
 
   const pool = new Pool({ connectionString });
