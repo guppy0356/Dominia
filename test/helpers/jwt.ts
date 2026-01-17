@@ -8,9 +8,10 @@ import * as jose from "jose";
 export function enableDbConnect(): void {
   fetchMock.activate();
   fetchMock.disableNetConnect();
-  // Local uses WebSocket (unaffected by fetchMock), but CI uses Neon HTTP API
-  fetchMock.enableNetConnect(/\.localtest\.me/); // Local (Docker)
-  fetchMock.enableNetConnect(/\.neon\.tech/); // CI (Neon HTTP API)
+  // Allow all network connections for DB operations
+  // Local: WebSocket (unaffected by fetchMock anyway)
+  // CI: Neon HTTP API via poolQueryViaFetch
+  fetchMock.enableNetConnect();
 }
 
 /**
