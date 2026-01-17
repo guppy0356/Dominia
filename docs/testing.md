@@ -32,7 +32,7 @@ To prevent data corruption and race conditions, tests run against a dedicated te
 #### Network Requests (`fetchMock`)
 We use `fetchMock` to intercept external requests.
 * **Global Rule**: `fetchMock.disableNetConnect()` is enabled by default to prevent accidental external calls.
-* **Exception**: Connections to the local test database (`db.localtest.me:4444`) are explicitly allowed.
+* **Exception**: Connections to the test database are explicitly allowed (`*.localtest.me` for local Docker, `*.neon.tech` for CI).
 
 #### Authentication (JWT)
 Protected endpoints are tested using helper utilities in `test/helpers/jwt.ts`.
@@ -88,8 +88,9 @@ beforeAll(async () => {
 beforeEach(() => {
   fetchMock.activate();
   fetchMock.disableNetConnect();
-  // Allow connection to the local DB proxy
-  fetchMock.enableNetConnect(/db\.localtest\.me:4444/);
+  // Allow connection to test databases
+  fetchMock.enableNetConnect(/\.localtest\.me/); // Local (Docker)
+  fetchMock.enableNetConnect(/\.neon\.tech/); // CI (Neon HTTP API)
 
   // Mock JWKS endpoint dynamically
   const jwksUrl = new URL(env.JWKS_URI);
