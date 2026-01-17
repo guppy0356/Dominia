@@ -34,6 +34,13 @@ jobs:
 
       - run: npm ci
 
+      - name: Debug DATABASE_URL
+        run: |
+          echo "URL length: ${#DATABASE_URL}"
+          echo "URL prefix: ${DATABASE_URL:0:30}..."
+        env:
+          DATABASE_URL: ${{ steps.create-branch.outputs.db_url_with_pooler }}
+
       - name: Prepare Test DB
         run: npm run test:prepare
         env:
