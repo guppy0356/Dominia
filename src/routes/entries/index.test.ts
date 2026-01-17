@@ -1,6 +1,10 @@
 import { env } from "cloudflare:test";
 import { faker } from "@faker-js/faker";
-import { authenticated } from "@test/helpers/jwt";
+import {
+  authenticated,
+  disableDbConnect,
+  enableDbConnect,
+} from "@test/helpers/jwt";
 import { reset, seed } from "drizzle-seed";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createDrizzleClient } from "@/db/client";
@@ -10,6 +14,7 @@ import type { Collection } from "@/routes/entries/schema";
 
 describe("GET /entries", () => {
   beforeEach(async () => {
+    enableDbConnect();
     const client = createDrizzleClient(env.DATABASE_URL);
 
     await seed(
@@ -31,11 +36,14 @@ describe("GET /entries", () => {
         },
       },
     }));
+    disableDbConnect();
   });
 
   afterEach(async () => {
+    enableDbConnect();
     const client = createDrizzleClient(env.DATABASE_URL);
     await reset(client, { entries });
+    disableDbConnect();
   });
 
   it("should return 401 without authentication", async () => {

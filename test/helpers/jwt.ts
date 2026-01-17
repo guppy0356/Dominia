@@ -1,6 +1,25 @@
 import { env, fetchMock } from "cloudflare:test";
 import * as jose from "jose";
 
+/**
+ * Enable network connections to test databases.
+ * Call this before any DB operations (seed, reset, queries).
+ */
+export function enableDbConnect(): void {
+  fetchMock.activate();
+  fetchMock.disableNetConnect();
+  // Local uses WebSocket (unaffected by fetchMock), but CI uses Neon HTTP API
+  fetchMock.enableNetConnect(/\.localtest\.me/); // Local (Docker)
+  fetchMock.enableNetConnect(/\.neon\.tech/); // CI (Neon HTTP API)
+}
+
+/**
+ * Deactivate fetchMock after DB operations.
+ */
+export function disableDbConnect(): void {
+  fetchMock.deactivate();
+}
+
 // Generate key pair once at module load time
 const keyPairPromise = (async () => {
   const { privateKey, publicKey } = await jose.generateKeyPair("RS256");
@@ -24,11 +43,7 @@ export async function authenticated(
   const { privateKey, publicJwk } = await keyPairPromise;
 
   // Setup fetchMock
-  fetchMock.activate();
-  fetchMock.disableNetConnect();
-  // Local uses WebSocket (unaffected by fetchMock), but CI uses Neon HTTP API
-  fetchMock.enableNetConnect(/\.localtest\.me/); // Local (Docker)
-  fetchMock.enableNetConnect(/\.neon\.tech/); // CI (Neon HTTP API)
+  enableDbConnect();
 
   const jwksUrl = new URL(env.JWKS_URI);
   fetchMock
