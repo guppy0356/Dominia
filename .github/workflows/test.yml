@@ -34,6 +34,13 @@ jobs:
 
       - run: npm ci
 
+      - name: Create .dev.vars.test
+        run: |
+          cat <<EOF > .dev.vars.test
+          DATABASE_URL=${{ steps.create-branch.outputs.db_url_pooled }}
+          JWKS_URI=https://test-jwks.local/.well-known/jwks.json
+          EOF
+
       - name: Prepare Test DB
         run: npm run test:prepare
         env:
@@ -41,6 +48,3 @@ jobs:
 
       - name: Run Tests
         run: npm test
-        env:
-          DATABASE_URL: ${{ steps.create-branch.outputs.db_url_pooled }}
-          JWKS_URI: https://test-jwks.local/.well-known/jwks.json
