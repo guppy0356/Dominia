@@ -20,23 +20,13 @@ app.use(createJwtMiddleware());
  * @throws 500 - Database connection or query failure
  */
 app.get("/", async (c) => {
-  console.log("[DEBUG] GET /entries called");
-  console.log("[DEBUG] DATABASE_URL exists:", !!c.env.DATABASE_URL);
-  console.log("[DEBUG] JWKS_URI:", c.env.JWKS_URI);
+  const client = createDrizzleClient(c.env.DATABASE_URL);
 
-  try {
-    const client = createDrizzleClient(c.env.DATABASE_URL);
-    console.log("[DEBUG] Drizzle client created");
+  // Query all entries
+  const entryCollection = await client.select().from(entries);
+  const safeResponse = EntrySchema.collection.parse(entryCollection);
 
-    const entryCollection = await client.select().from(entries);
-    console.log("[DEBUG] Query successful, rows:", entryCollection.length);
-
-    const safeResponse = EntrySchema.collection.parse(entryCollection);
-    return c.json(safeResponse, 200);
-  } catch (error) {
-    console.error("[DEBUG] Error occurred:", error);
-    throw error;
-  }
+  return c.json(safeResponse, 200);
 });
 
 /**
