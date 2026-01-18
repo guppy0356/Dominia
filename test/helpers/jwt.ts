@@ -26,10 +26,9 @@ export async function authenticated(
   // Setup fetchMock
   fetchMock.activate();
   fetchMock.disableNetConnect();
-  // NOTE: Local uses WebSocket, so fetchMock doesn't affect DB connections.
-  // Temporarily commented out to verify if CI (Neon HTTP API) actually needs these.
-  // fetchMock.enableNetConnect(/\.localtest\.me/); // Local (Docker)
-  // fetchMock.enableNetConnect(/\.neon\.tech/); // CI (Neon HTTP API)
+  // Allow DB connections (HTTP mode via poolQueryViaFetch)
+  fetchMock.enableNetConnect(/\.localtest\.me/); // Local (Docker)
+  fetchMock.enableNetConnect(/\.neon\.tech/); // CI (Neon HTTP API)
 
   const jwksUrl = new URL(env.JWKS_URI);
   fetchMock

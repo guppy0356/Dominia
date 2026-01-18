@@ -12,6 +12,11 @@ export function createDrizzleClient(connectionString: string) {
     neonConfig.useSecureWebSocket = false;
     neonConfig.pipelineTLS = false;
     neonConfig.pipelineConnect = false;
+    neonConfig.poolQueryViaFetch = true;
+    neonConfig.fetchEndpoint = (host) => {
+      const port = 4444;
+      return `http://${host}:${port}/sql`;
+    };
   } else {
     neonConfig.wsProxy = (host) => `${host}/v2`;
     neonConfig.useSecureWebSocket = true;
