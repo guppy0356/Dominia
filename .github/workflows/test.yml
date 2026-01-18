@@ -24,7 +24,9 @@ jobs:
         id: create-branch
         with:
           project_id: ${{ vars.NEON_PROJECT_ID }}
+          parent_branch: main
           branch_name: ci/pr-${{ github.event.pull_request.number }}
+          branch_type: schema-only
           api_key: ${{ secrets.NEON_API_KEY }}
 
       - uses: actions/setup-node@v6
