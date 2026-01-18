@@ -8,6 +8,12 @@ import { entries } from "@/db/schema";
 import app from "@/index";
 import type { Collection } from "@/routes/entries/schema";
 
+describe("simple assertion", () => {
+  it("should verify 1 equals 1", () => {
+    expect(1).toBe(1);
+  });
+});
+
 describe("GET /entries", () => {
   beforeEach(async () => {
     const client = createDrizzleClient(env.DATABASE_URL);
