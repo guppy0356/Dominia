@@ -14,6 +14,31 @@ describe("simple assertion", () => {
   });
 });
 
+describe("transaction test", () => {
+  afterEach(async () => {
+    const client = createDrizzleClient(env.DATABASE_URL);
+    await reset(client, { entries });
+  });
+
+  it("should handle transaction with db_url_pooled", async () => {
+    const client = createDrizzleClient(env.DATABASE_URL);
+
+    await client.transaction(async (tx) => {
+      await tx.insert(entries).values({
+        id: faker.string.uuid(),
+        url: "https://transaction-test.com",
+      });
+    });
+
+    const result = await client.query.entries.findMany({
+      where: (entries, { eq }) =>
+        eq(entries.url, "https://transaction-test.com"),
+    });
+
+    expect(result.length).toBe(1);
+  });
+});
+
 describe("GET /entries", () => {
   beforeEach(async () => {
     const client = createDrizzleClient(env.DATABASE_URL);
