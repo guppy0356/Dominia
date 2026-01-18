@@ -10,6 +10,12 @@ export default defineWorkersConfig({
     poolOptions: {
       workers: {
         wrangler: { configPath: "./wrangler.jsonc", environment: "test" },
+        miniflare: {
+          // Allow external network connections (WebSocket to Neon)
+          outboundService: {
+            network: { allow: ["public", "private", "local"] },
+          },
+        },
       },
     },
   },

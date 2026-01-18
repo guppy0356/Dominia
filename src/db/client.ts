@@ -6,18 +6,14 @@ export function createDrizzleClient(connectionString: string) {
   const connectionStringUrl = new URL(connectionString);
   const isLocal = connectionStringUrl.hostname.endsWith(".localtest.me");
 
-  // 接続先に応じたプロキシ設定
   if (isLocal) {
+    // Local: WebSocket via proxy
     neonConfig.wsProxy = (host) => `${host}:4444/v2`;
     neonConfig.useSecureWebSocket = false;
     neonConfig.pipelineTLS = false;
     neonConfig.pipelineConnect = false;
-  } else {
-    // CI/Production: HTTP-only mode via Neon pooler
-    // Don't set wsProxy to avoid WebSocket connection attempts
-    neonConfig.poolQueryViaFetch = true;
-    neonConfig.fetchConnectionCache = true;
   }
+  // CI/Production: Use default Neon WebSocket connection
 
   const pool = new Pool({ connectionString });
   return drizzle(pool, { schema });
