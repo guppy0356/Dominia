@@ -7,6 +7,10 @@
     "JWKS_URI": "https://keeplater.kinde.com/.well-known/jwks.json"
   },
   "env": {
-    "test": {}
+    "test": {
+      "vars": {
+        "JWKS_URI": "https://test-jwks.local/.well-known/jwks.json"
+      }
+    }
   }
 }
