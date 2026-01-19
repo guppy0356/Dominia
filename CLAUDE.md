@@ -33,7 +33,7 @@ lefthook.yml              # Git hooks configuration
 - **Dev**: `npm run dev` (Starts Vite server)
 - **Build/Deploy**: `npm run build` / `npm run deploy`
 - **Database**:
-  - Migrate: `npm run db:migrate` (Dev) / `npm run test:prepare` (Test)
+  - Migrate: `npm run db:migrate` (Dev) / `npm run db:migrate:test` (Test)
   - Reset: `npm run db:clean`
 - **Test**: `npm test` (Runs sequentially for DB safety)
 - **Type/Env**: `npm run hono:env` (Sync .env -> .dev.vars)

@@ -123,8 +123,8 @@ test/
 ## Test Utilities & Scripts
 
 ### Database Management
-* **`npm run test:prepare`**: Runs migrations against the test database (using `.env.test`).
-* **`npm run db:clean -- --env=test`**: Drops all tables and resets the test database.
+* **`npm run db:migrate:test`**: Runs migrations against the test database (using `.env.test`).
+* **`npm run db:clean:test`**: Drops all tables and resets the test database.
 * **`npm test`**: Runs the full test suite.
 
 ### Example Test Structure

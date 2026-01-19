@@ -10,11 +10,11 @@
     "type-check": "npm run cf-typegen && tsc --noEmit",
     "hono:env": "tsx scripts/generate-dev-vars.ts",
     "db:migrate": "npx dotenv -e .env -- drizzle-kit migrate",
+    "db:migrate:test": "npx dotenv -e .env.test -- drizzle-kit migrate",
     "db:studio": "npx dotenv -e .env -- drizzle-kit studio",
     "db:studio:test": "npx dotenv -e .env.test -- drizzle-kit studio --port 4984",
     "db:clean": "tsx scripts/db-clean.ts",
-    "test:prepare": "npx dotenv -e .env.test -- drizzle-kit migrate",
-    "test:clean": "tsx scripts/db-clean.ts --env=test",
+    "db:clean:test": "tsx scripts/db-clean.ts --env=test",
     "test": "vitest run"
   },
   "dependencies": {
