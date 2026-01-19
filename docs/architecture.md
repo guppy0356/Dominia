@@ -23,8 +23,10 @@ The project maintains strict separation between development and test environment
 > **Note:** Always use `npm run hono:env` to sync changes from `.env` to `.dev.vars`. This script validates variables against the Zod schema in `src/types.ts`.
 
 ### 2. Drizzle Configuration
-* `drizzle.config.ts`: Reads from `.env` (Target: Dev Database)
-* `drizzle.test.config.ts`: Reads from `.env.test` (Target: Test Database)
+* `drizzle.config.ts`: Single config file used for both dev and test
+* Environment variables are loaded via `dotenv-cli` in npm scripts:
+    * Dev: `npx dotenv -e .env -- drizzle-kit migrate`
+    * Test: `npx dotenv -e .env.test -- drizzle-kit migrate`
 
 ### 3. Wrangler Environments
 * **Default**: Used for development and production deployments.
@@ -34,7 +36,7 @@ The project maintains strict separation between development and test environment
 
 Environment variables are defined and validated using **Zod** in `src/types.ts`.
 
-* **Validation**: The `parseEnv()` function validates variables at runtime.
+* **Validation**: The `envSchema.parse()` method validates variables at runtime.
 * **Type Generation**: `npm run cf-typegen` generates Cloudflare bindings types from `wrangler.jsonc`.
 * **Key Variables**:
     * `DATABASE_URL`: Postgres connection string (Required).
