@@ -18,8 +18,8 @@ app.route("/share", share);
 
 app.get("/manifest.json", (c) => {
   return c.json({
-    name: "KeepLater",
-    short_name: "KeepLater",
+    name: "Dominia",
+    short_name: "Dominia",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
@@ -47,12 +47,12 @@ app.get("/", (c) => {
   return c.html(
     html`<html>
       <head>
-        <title>KeepLater</title>
+        <title>Dominia</title>
         <link rel="manifest" href="/manifest.json" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body>
-        <h1>KeepLater</h1>
+        <h1>Dominia</h1>
         <p>ブラウザのメニューから「アプリをインストール」してください。</p>
       </body>
     </html>`,
