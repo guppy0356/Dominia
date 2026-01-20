@@ -23,12 +23,19 @@ app.get("/manifest.json", (c) => {
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#4a90e2",
+    theme_color: "#ffffff",
     icons: [
       {
-        src: "https://placehold.co/192x192.png",
+        src: "/icon-192x192.png",
         sizes: "192x192",
         type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
     share_target: {
