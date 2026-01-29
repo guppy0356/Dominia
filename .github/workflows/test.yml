@@ -26,7 +26,6 @@ jobs:
           project_id: ${{ vars.NEON_PROJECT_ID }}
           parent_branch: main
           branch_name: ci/pr-${{ github.event.pull_request.number }}
-          branch_type: schema-only
           api_key: ${{ secrets.NEON_API_KEY }}
 
       - uses: actions/setup-node@v6
@@ -44,9 +43,17 @@ jobs:
           EOF
 
       - name: Prepare Test DB
-        run: npm run db:migrate:test
+        run: npm run db:clean:test && npm run db:migrate:test
         env:
           DATABASE_URL: ${{ steps.create-branch.outputs.db_url_pooled }}
 
       - name: Run Tests
         run: npm test
+
+      - name: Delete Neon Branch
+        if: always()
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: ci/pr-${{ github.event.pull_request.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}
