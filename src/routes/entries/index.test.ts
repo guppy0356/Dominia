@@ -9,8 +9,8 @@ import app from "@/index";
 import type { Collection } from "@/routes/entries/schema";
 
 describe("simple assertion", () => {
-  it("should verify 1 equals 1", () => {
-    expect(1).toBe(1);
+  it("should verify 2 equals 2", () => {
+    expect(2).toBe(2);
   });
 });
 
