@@ -1,26 +1,13 @@
-import dotenv from "dotenv";
-import dotenvExpand from "dotenv-expand";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { reset } from "drizzle-seed";
 import postgres from "postgres";
+import { envSchema } from "@/types";
 import * as schema from "../src/db/schema";
 
-const isTest = process.argv.includes("--env=test");
-const envPath = isTest ? ".env.test" : ".env";
-const env: Record<string, string> = {};
-const parsed = dotenv.config({ path: envPath, processEnv: env });
-dotenvExpand.expand({ ...parsed, processEnv: env });
-
-async function main() {
-  if (!env.DATABASE_URL) {
-    throw new Error(`DATABASE_URL not found in ${envPath}`);
-  }
-
-  console.log(`🧹 Truncating tables in ${isTest ? "TEST" : "DEV"} DB...`);
-
+async function truncate() {
+  const env = envSchema.pick({ DATABASE_URL: true }).parse(process.env);
   const url = new URL(env.DATABASE_URL);
   const isLocal = url.hostname.endsWith(".localtest.me");
-
   const sslMode = isLocal ? false : "require";
 
   const client = postgres(env.DATABASE_URL, {
@@ -41,4 +28,4 @@ async function main() {
   }
 }
 
-main();
+truncate();
