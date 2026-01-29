@@ -15,6 +15,8 @@
     "db:studio:test": "npx dotenv -e .env.test -- drizzle-kit studio --port 4984",
     "db:clean": "tsx scripts/db-clean.ts",
     "db:clean:test": "tsx scripts/db-clean.ts --env=test",
+    "db:truncate": "tsx scripts/db-truncate.ts",
+    "db:truncate:test": "tsx scripts/db-truncate.ts --env=test",
     "test": "vitest run"
   },
   "dependencies": {
