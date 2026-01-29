@@ -26,18 +26,19 @@ jobs:
         run: npm run build
 
       - name: Upload new version
+        id: upload
         run: |
           mkdir -p /tmp/wrangler-output
           npx wrangler versions upload --message "${{ github.event.head_commit.message }}"
+          VERSION_ID=$(cat /tmp/wrangler-output/wrangler-output-*.json | jq -r 'select(.type == "version-upload") | .version_id')
+          echo "version_id=$VERSION_ID" >> "$GITHUB_OUTPUT"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_OUTPUT_FILE_DIRECTORY: /tmp/wrangler-output
 
       - name: Deploy version
-        run: |
-          VERSION_ID=$(cat /tmp/wrangler-output/wrangler-output-*.json | jq -r 'select(.type == "version-upload") | .version_id')
-          npx wrangler versions deploy "$VERSION_ID@100" --yes
+        run: npx wrangler versions deploy "${{ steps.upload.outputs.version_id }}@100" --yes
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
