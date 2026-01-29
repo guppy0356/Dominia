@@ -9,5 +9,6 @@ import type { Bindings } from "@/types";
 export function createJwtMiddleware() {
   return jwk({
     jwks_uri: (c: Context<{ Bindings: Bindings }>) => c.env.JWKS_URI,
+    alg: ["RS256"],
   });
 }
