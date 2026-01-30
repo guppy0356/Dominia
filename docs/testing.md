@@ -93,6 +93,7 @@ test/
 
 ### Database Management
 * **`npm run db:migrate:test`**: Runs migrations against the test database (using `.env.test`).
+* **`npm run db:truncate:test`**: Truncates all tables (faster than clean, keeps schema).
 * **`npm run db:clean:test`**: Drops all tables and resets the test database.
 * **`npm test`**: Runs the full test suite.
 
@@ -149,13 +150,11 @@ describe("GET /share", () => {
 
 ### GitHub Actions Workflows
 
-**`test.yml`**: Runs tests on pull requests
-* Triggers on PR open, reopen, and synchronize events
-* Creates an ephemeral Neon database branch per PR
+**`quality.yml`**: Runs quality checks on pull requests
+* Triggers on PR to main branch
+* Runs Biome linting and TypeScript type checking
+* Creates an ephemeral Neon database branch, runs tests, then cleans up
 * Generates `.dev.vars.test` dynamically with Neon connection URL
-
-**`cleanup.yml`**: Cleans up resources when PRs close
-* Deletes the Neon database branch created for the PR
 
 ### Neon Database Branches
 
@@ -167,13 +166,11 @@ CI uses Neon's branching feature for isolated test environments:
     project_id: ${{ vars.NEON_PROJECT_ID }}
     parent_branch: main
     branch_name: ci/pr-${{ github.event.pull_request.number }}
-    branch_type: schema-only  # Schema only, no data copied
     api_key: ${{ secrets.NEON_API_KEY }}
 ```
 
-* **`schema-only`**: Creates branch with schema but no data (faster, smaller)
 * **Branch naming**: `ci/pr-{number}` for easy identification
-* **Automatic cleanup**: Branch deleted when PR is closed/merged
+* **Automatic cleanup**: Branch deleted at the end of the test job
 
 ### Dynamic Environment Setup in CI
 
