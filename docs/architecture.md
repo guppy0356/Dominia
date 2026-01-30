@@ -40,13 +40,11 @@ Environment variables are defined and validated using **Zod** in `src/types.ts`.
 * **Type Generation**: `npm run cf-typegen` generates Cloudflare bindings types from `wrangler.jsonc`.
 * **Key Variables**:
     * `DATABASE_URL`: Postgres connection string (Required).
-    * `JWKS_URI`: JWT key set URI for authentication (Required).
 
 ## Hono App Structure
 
 * **Entry Point**: `src/index.ts` exports the Hono app instance and mounts route sub-apps.
-* **API Design**: All endpoints return JSON responses.
-* **Middleware**: Protected routes utilize `jwk()` middleware for JWT validation, configured in `src/middleware/auth.ts`.
+* **API Design**: Endpoints return JSON or HTML responses depending on the use case.
 * **Dependency Injection**: The Database client is instantiated **per-request** via `createDrizzleClient(c.env.DATABASE_URL)` to ensure the correct environment variables are used.
 
 ## Routing Organization
@@ -60,30 +58,28 @@ src/
 ├── routes/
 │   └── {resource}/
 │       ├── index.ts        # Sub-app for each resource
-│       ├── schema.ts       # Zod validation schemas (drizzle-zod)
+│       ├── schema.ts       # Zod validation schemas
 │       └── index.test.ts   # Colocated integration tests
-├── middleware/
-│   └── auth.ts             # JWT auth configuration
 └── index.ts                # Main app (mounts routes)
 ```
 
 ### Sub-Apps Pattern
 
-Each resource (e.g., `entries`, `users`) has its own **sub-app**:
+Each resource (e.g., `share`) has its own **sub-app**:
 
 * **Location**: `src/routes/{resource}/index.ts`
 * **Structure**: Exports a Hono instance with resource-specific routes
 * **Mounting**: Main app uses `app.route("/{resource}", subApp)` to mount
 
-**Example** (`src/routes/entries/index.ts`):
+**Example** (`src/routes/share/index.ts`):
 ```typescript
+import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import type { Bindings } from "@/types";
-import { createJwtMiddleware } from "@/middleware/auth";
+import { shareQuery } from "./schema";
 
 const app = new Hono<{ Bindings: Bindings }>();
-app.use(createJwtMiddleware());  // Resource-level middleware
-app.get("/", async (c) => { /* handler */ });
+app.get("/", zValidator("query", shareQuery), async (c) => { /* handler */ });
 export default app;
 ```
 
@@ -97,17 +93,7 @@ new Hono<{ Bindings: Bindings }>()
 
 This ensures:
 * `c.env.DATABASE_URL` is properly typed as `string`
-* `c.env.JWKS_URI` is properly typed as `string`
 * Full type inference across all routes
-
-### Middleware Hierarchy
-
-Middleware is applied at two levels:
-
-1. **Resource-level** (sub-app): Applied to all routes within a resource
-   * Example: JWT authentication for `/entries/*`
-2. **Route-specific**: Applied to individual route handlers
-   * Use sparingly; prefer resource-level middleware
 
 ### Adding New Routes
 
@@ -145,13 +131,19 @@ The project uses a two-layer schema approach:
 * Extended with additional validation rules (e.g., URL format validation)
 * Provides type inference for TypeScript types
 
-**Example** (`src/routes/entries/schema.ts`):
+**Example** (`src/routes/share/schema.ts`):
 ```typescript
-const selectSchema = createSelectSchema(entries); // From Drizzle table
-export const entry = selectSchema.extend({
-  url: z.url(), // Additional validation
+/** HTTP(S) URL validator */
+const httpUrl = z.string().refine((url) => {
+  const parsed = new URL(url);
+  return parsed.protocol === "http:" || parsed.protocol === "https:";
 });
-export const collection = z.array(entry);
+
+export const shareQuery = z.object({
+  url: httpUrl.optional(),
+  text: z.string().optional(),
+  title: httpUrl.optional(),
+});
 ```
 
 **Benefits**:
