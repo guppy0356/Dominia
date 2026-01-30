@@ -8,11 +8,10 @@
 ## File Structure
 src/
 ├── routes/
-│   └── entries/
-│       ├── index.ts          # Entries routes sub-app (GET, POST, etc.)
-│       └── index.test.ts     # Colocated integration tests
-├── middleware/
-│   └── auth.ts           # JWT authentication config
+│   └── share/
+│       ├── index.ts          # PWA share_target endpoint
+│       ├── index.test.ts     # Colocated integration tests
+│       └── schema.ts         # Zod schemas for share route
 ├── db/
 │   ├── client.ts         # DB connection (Local/Remote auto-switch)
 │   ├── schema.ts         # Drizzle schema definition
@@ -20,10 +19,8 @@ src/
 ├── index.ts              # Hono app entry (mounts routes)
 └── types.ts              # Zod schemas & Env types
 test/
-├── helpers/
-│   └── jwt.ts            # JWT/Auth mocking helpers
 └── env.d.ts              # Test type definitions
-scripts/                  # Utilities (db-clean, env-gen)
+scripts/                  # Utilities (db-clean, db-truncate, env-gen)
 docker/                   # Local dev infrastructure (Caddy, Postgres)
 docs/                     # Detailed architecture docs (See below)
 wrangler.jsonc            # Cloudflare Workers config
@@ -34,7 +31,8 @@ lefthook.yml              # Git hooks configuration
 - **Build/Deploy**: `npm run build` / `npm run deploy`
 - **Database**:
   - Migrate: `npm run db:migrate` (Dev) / `npm run db:migrate:test` (Test)
-  - Reset: `npm run db:clean`
+  - Truncate: `npm run db:truncate` (テーブル内容のみクリア)
+  - Reset: `npm run db:clean` (テーブルドロップ)
 - **Test**: `npm test` (Runs sequentially for DB safety)
 - **Type/Env**: `npm run hono:env` (Sync .env -> .dev.vars)
 
@@ -45,9 +43,8 @@ Refer to `docs/` for complex logic details:
 
 ## Routing Organization
 Routes are organized using Hono's `app.route()` pattern for scalability:
-- **Sub-apps**: Each resource (entries, users, etc.) has its own sub-app in `src/routes/{resource}/index.ts`
+- **Sub-apps**: Each resource (share, etc.) has its own sub-app in `src/routes/{resource}/index.ts`
 - **Type Safety**: All sub-apps use `new Hono<{ Bindings: Bindings }>()` for proper type inference
-- **Middleware**: Apply at different levels (global in `index.ts`, resource-level in sub-apps)
 - **Adding Routes**:
   1. Create `src/routes/{resource}/index.ts` with a Hono sub-app
   2. Mount in `src/index.ts`: `app.route("/{resource}", resourceApp)`
