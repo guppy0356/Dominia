@@ -3,14 +3,7 @@
   "name": "dominia",
   "compatibility_date": "2025-08-03",
   "main": "./src/index.ts",
-  "vars": {
-    "JWKS_URI": "https://keeplater.kinde.com/.well-known/jwks.json"
-  },
   "env": {
-    "test": {
-      "vars": {
-        "JWKS_URI": "https://test-jwks.local/.well-known/jwks.json"
-      }
-    }
+    "test": {}
   }
 }

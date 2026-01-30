@@ -12,20 +12,6 @@ Tests require proper environment variables. Configuration is managed through mul
 
 **`.env.test`** (committed to repository):
 * **`DATABASE_URL`**: Test database connection (configured via Docker for local, Neon for CI)
-* **`JWKS_URI`**: Mock JWKS endpoint URL (`https://test-jwks.local/.well-known/jwks.json`)
-
-**`wrangler.jsonc`** (test environment):
-```jsonc
-{
-  "env": {
-    "test": {
-      "vars": {
-        "JWKS_URI": "https://test-jwks.local/.well-known/jwks.json"
-      }
-    }
-  }
-}
-```
 
 **`.dev.vars.test`** (runtime variables for Workers):
 * Generated from `.env.test` locally via `npm run hono:env`
@@ -34,7 +20,7 @@ Tests require proper environment variables. Configuration is managed through mul
 ### Path Aliases
 Tests use TypeScript path aliases for clean imports:
 * **`@/*`**: Maps to `src/*` for application code.
-* **`@test/*`**: Maps to `test/*` for test utilities (e.g., `@test/helpers/jwt`).
+* **`@test/*`**: Maps to `test/*` for test utilities.
 * **Configuration**: Defined in `tsconfig.json` and resolved via `vite-tsconfig-paths` plugin in `vitest.config.ts`.
 
 ### 1. Database Isolation Strategy
@@ -53,22 +39,6 @@ We use `fetchMock` to intercept external requests.
 * **Exception**: Connections to test databases are explicitly allowed:
   * `*.localtest.me` for local Docker
   * `*.neon.tech` for CI (Neon HTTP API)
-
-#### Authentication (JWT)
-Protected endpoints are tested using the `authenticated()` helper in `test/helpers/jwt.ts`.
-
-* **Helper Function**: `authenticated(testFn)` wraps test logic with full JWT authentication setup:
-  * Automatically handles `fetchMock` setup and teardown
-  * Configures JWKS endpoint mock from `env.JWKS_URI`
-  * Generates a valid signed JWT token
-  * Asserts no pending interceptors after test completion
-* **Mechanism**: Creates RSA key pairs at module load time and signs valid JWTs for testing.
-
-```typescript
-export async function authenticated(
-  testFn: (token: string) => Promise<void>,
-): Promise<void>;
-```
 
 ### 3. Test Data Generation
 Tests use `drizzle-seed` with `@faker-js/faker` to generate realistic test data.
@@ -107,16 +77,15 @@ afterEach(async () => {
 ### Test Organization
 Tests are colocated with source code for better maintainability:
 * **Integration Tests**: Located in `src/routes/{resource}/index.test.ts` alongside route handlers
-* **Test Helpers**: Shared utilities in `test/helpers/` (e.g., `jwt.ts`)
 * **Type Definitions**: Test-specific types in `test/env.d.ts`
 
 Example structure:
 ```
-src/routes/entries/
+src/routes/share/
 ├── index.ts          # Route handlers
+├── schema.ts         # Zod validation schemas
 └── index.test.ts     # Integration tests
 test/
-├── helpers/jwt.ts    # Shared JWT utilities
 └── env.d.ts          # Test type definitions
 ```
 
@@ -128,32 +97,21 @@ test/
 * **`npm test`**: Runs the full test suite.
 
 ### Example Test Structure
-Refer to `src/routes/entries/index.test.ts` for a complete example.
+Refer to `src/routes/share/index.test.ts` for a complete example.
 
 ```typescript
 import { env } from "cloudflare:test";
-import { faker } from "@faker-js/faker";
-import { authenticated } from "@test/helpers/jwt";
-import { reset, seed } from "drizzle-seed";
+import { eq } from "drizzle-orm";
+import { reset } from "drizzle-seed";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createDrizzleClient } from "@/db/client";
 import { entries } from "@/db/schema";
 import app from "@/index";
-import type { Collection } from "@/routes/entries/schema";
 
-describe("GET /entries", () => {
+describe("GET /share", () => {
   beforeEach(async () => {
     const client = createDrizzleClient(env.DATABASE_URL);
-    await seed(client, { entries }, { count: 5 }).refine((f) => ({
-      entries: {
-        columns: {
-          id: f.valuesFromArray({
-            values: Array.from({ length: 10 }, () => faker.string.uuid()),
-            isUnique: true,
-          }),
-        },
-      },
-    }));
+    await reset(client, { entries });
   });
 
   afterEach(async () => {
@@ -161,26 +119,28 @@ describe("GET /entries", () => {
     await reset(client, { entries });
   });
 
-  it("should return 401 without authentication", async () => {
-    const res = await app.request("/entries", {}, env);
-    expect(res.status).toBe(401);
+  it("should save URL from url parameter", async () => {
+    const testUrl = "https://example.com/page";
+    const res = await app.request(
+      `/share?url=${encodeURIComponent(testUrl)}`,
+      {},
+      env,
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/html");
+
+    const client = createDrizzleClient(env.DATABASE_URL);
+    const saved = await client
+      .select()
+      .from(entries)
+      .where(eq(entries.url, testUrl));
+    expect(saved).toHaveLength(1);
   });
 
-  it("should return 200 with JSON array when authenticated", async () => {
-    await authenticated(async (token) => {
-      const res = await app.request(
-        "/entries",
-        { headers: { Authorization: `Bearer ${token}` } },
-        env,
-      );
-
-      expect(res.status).toBe(200);
-      expect(res.headers.get("content-type")).toContain("application/json");
-
-      const data = (await res.json()) as Collection;
-      expect(Array.isArray(data)).toBe(true);
-      expect(data.length).toBe(5);
-    });
+  it("should return 400 when no valid URL found", async () => {
+    const res = await app.request("/share", {}, env);
+    expect(res.status).toBe(400);
   });
 });
 ```
@@ -222,7 +182,6 @@ CI uses Neon's branching feature for isolated test environments:
   run: |
     cat <<EOF > .dev.vars.test
     DATABASE_URL=${{ steps.create-branch.outputs.db_url_pooled }}
-    JWKS_URI=https://test-jwks.local/.well-known/jwks.json
     EOF
 ```
 
