@@ -29,7 +29,7 @@ jobs:
         id: upload
         run: |
           mkdir -p /tmp/wrangler-output
-          npx wrangler versions upload --message "$COMMIT_MESSAGE" --tag "Github"
+          npx wrangler versions upload --message "$COMMIT_MESSAGE"
           VERSION_ID=$(cat /tmp/wrangler-output/wrangler-output-*.json | jq -r 'select(.type == "version-upload") | .version_id')
           echo "version_id=$VERSION_ID" >> "$GITHUB_OUTPUT"
         env:
