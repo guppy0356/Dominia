@@ -1,7 +1,7 @@
 import { env } from "cloudflare:test";
 import { eq } from "drizzle-orm";
 import { reset } from "drizzle-seed";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createDrizzleClient } from "@/db/client";
 import { entries } from "@/db/schema";
 import app from "@/index";
@@ -9,11 +9,6 @@ import app from "@/index";
 describe("GET /share", () => {
   beforeEach(async () => {
     // Reset before each test to handle test interleaving from vitest-pool-workers
-    const client = createDrizzleClient(env.DATABASE_URL);
-    await reset(client, { entries });
-  });
-
-  afterEach(async () => {
     const client = createDrizzleClient(env.DATABASE_URL);
     await reset(client, { entries });
   });
