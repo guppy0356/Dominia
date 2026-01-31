@@ -178,4 +178,98 @@ describe("GET /share", () => {
       expect(res.status).toBe(200);
     });
   });
+
+  describe("Duplicate URL handling", () => {
+    it("should return 'Already Saved' for duplicate URL", async () => {
+      const testUrl = "https://share-test-duplicate.example.com/page";
+
+      // 1回目: 新規保存
+      const res1 = await app.request(
+        `/share?url=${encodeURIComponent(testUrl)}`,
+        {},
+        env,
+      );
+      expect(res1.status).toBe(200);
+      const html1 = await res1.text();
+      expect(html1).toContain("Saved");
+      expect(html1).not.toContain("Already Saved");
+
+      // 2回目: 重複
+      const res2 = await app.request(
+        `/share?url=${encodeURIComponent(testUrl)}`,
+        {},
+        env,
+      );
+      expect(res2.status).toBe(200);
+      const html2 = await res2.text();
+      expect(html2).toContain("Already Saved");
+
+      // DBに1件のみ保存されていることを確認
+      const client = createDrizzleClient(env.DATABASE_URL);
+      const saved = await client
+        .select()
+        .from(entries)
+        .where(eq(entries.url, testUrl));
+      expect(saved).toHaveLength(1);
+    });
+
+    it("should return 'Saved' for different URLs", async () => {
+      const url1 = "https://share-test-unique1.example.com";
+      const url2 = "https://share-test-unique2.example.com";
+
+      const res1 = await app.request(
+        `/share?url=${encodeURIComponent(url1)}`,
+        {},
+        env,
+      );
+      expect(res1.status).toBe(200);
+      const html1 = await res1.text();
+      expect(html1).toContain("Saved");
+      expect(html1).not.toContain("Already Saved");
+
+      const res2 = await app.request(
+        `/share?url=${encodeURIComponent(url2)}`,
+        {},
+        env,
+      );
+      expect(res2.status).toBe(200);
+      const html2 = await res2.text();
+      expect(html2).toContain("Saved");
+      expect(html2).not.toContain("Already Saved");
+    });
+
+    it("should detect duplicate when URL comes from text parameter", async () => {
+      const testUrl = "https://share-test-dup-text.example.com";
+
+      // 1回目: url パラメータで保存
+      const res1 = await app.request(
+        `/share?url=${encodeURIComponent(testUrl)}`,
+        {},
+        env,
+      );
+      expect(res1.status).toBe(200);
+      const html1 = await res1.text();
+      expect(html1).toContain("Saved");
+      expect(html1).not.toContain("Already Saved");
+
+      // 2回目: text パラメータ経由で同じURL
+      const text = `Check this: ${testUrl}`;
+      const res2 = await app.request(
+        `/share?text=${encodeURIComponent(text)}`,
+        {},
+        env,
+      );
+      expect(res2.status).toBe(200);
+      const html2 = await res2.text();
+      expect(html2).toContain("Already Saved");
+
+      // DBに1件のみ
+      const client = createDrizzleClient(env.DATABASE_URL);
+      const saved = await client
+        .select()
+        .from(entries)
+        .where(eq(entries.url, testUrl));
+      expect(saved).toHaveLength(1);
+    });
+  });
 });

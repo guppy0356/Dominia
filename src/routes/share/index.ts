@@ -1,4 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { html } from "hono/html";
 import { createDrizzleClient } from "@/db/client";
@@ -25,10 +26,22 @@ app.get(
   }),
   async (c) => {
     const { extractedUrl } = c.req.valid("query");
-
     const client = createDrizzleClient(c.env.DATABASE_URL);
-    await client.insert(entries).values({ url: extractedUrl });
 
+    const existing = await client
+      .select({ id: entries.id })
+      .from(entries)
+      .where(eq(entries.url, extractedUrl))
+      .limit(1);
+
+    if (existing.length > 0) {
+      return c.html(
+        html`<!doctype html><html><body><h1>Already Saved</h1><p>${extractedUrl}</p></body></html>`,
+        200,
+      );
+    }
+
+    await client.insert(entries).values({ url: extractedUrl });
     return c.html(
       html`<!doctype html><html><body><h1>Saved</h1><p>${extractedUrl}</p></body></html>`,
       200,
