@@ -5,7 +5,7 @@ import { html } from "hono/html";
 import { createDrizzleClient } from "@/db/client";
 import { entries } from "@/db/schema";
 import type { Bindings } from "@/types";
-import { shareQuery } from "./schema";
+import { isBlockedDomain, shareQuery } from "./schema";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -26,6 +26,14 @@ app.get(
   }),
   async (c) => {
     const { extractedUrl } = c.req.valid("query");
+
+    if (isBlockedDomain(extractedUrl)) {
+      return c.html(
+        html`<!doctype html><html><body><h1>Blocked</h1><p>search.app links are device-specific dynamic links. The original site cannot be accessed after saving.</p></body></html>`,
+        422,
+      );
+    }
+
     const client = createDrizzleClient(c.env.DATABASE_URL);
 
     const existing = await client

@@ -167,6 +167,65 @@ describe("GET /share", () => {
     });
   });
 
+  describe("Blocked domains", () => {
+    it("should reject search.app URL from url parameter", async () => {
+      const res = await app.request(
+        "/share?url=https://search.app/link/abc123",
+        {},
+        env,
+      );
+
+      expect(res.status).toBe(422);
+      const html = await res.text();
+      expect(html).toContain("Blocked");
+      expect(html).toContain(
+        "search.app links are device-specific dynamic links",
+      );
+
+      const client = createDrizzleClient(env.DATABASE_URL);
+      const saved = await client
+        .select()
+        .from(entries)
+        .where(eq(entries.url, "https://search.app/link/abc123"));
+      expect(saved).toHaveLength(0);
+    });
+
+    it("should reject search.app URL from text parameter", async () => {
+      const text = "Check this: https://search.app/link/xyz";
+      const res = await app.request(
+        `/share?text=${encodeURIComponent(text)}`,
+        {},
+        env,
+      );
+
+      expect(res.status).toBe(422);
+      const html = await res.text();
+      expect(html).toContain("Blocked");
+    });
+
+    it("should reject search.app URL from title parameter", async () => {
+      const res = await app.request(
+        "/share?title=https://search.app/link/def",
+        {},
+        env,
+      );
+
+      expect(res.status).toBe(422);
+    });
+
+    it("should reject subdomain of search.app", async () => {
+      const res = await app.request(
+        "/share?url=https://www.search.app/link/sub",
+        {},
+        env,
+      );
+
+      expect(res.status).toBe(422);
+      const html = await res.text();
+      expect(html).toContain("Blocked");
+    });
+  });
+
   describe("No authentication required", () => {
     it("should work without Authorization header", async () => {
       const res = await app.request(

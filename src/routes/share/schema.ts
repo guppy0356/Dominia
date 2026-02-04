@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+const BLOCKED_DOMAINS = ["search.app"];
+
+export function isBlockedDomain(url: string): boolean {
+  const hostname = new URL(url).hostname;
+  return BLOCKED_DOMAINS.some(
+    (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+  );
+}
+
 /** HTTP(S) URL validator */
 const httpUrl = z.string().refine((url) => {
   try {
